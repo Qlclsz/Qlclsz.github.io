@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>卡密管理系统 | 完整版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: linear-gradient(135deg, #0a0f1e 0%, #0c1222 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .card {
+            background: rgba(18, 25, 45, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
+        }
+        .sub {
+            color: #8b92b0;
+            font-size: 13px;
+            margin-bottom: 24px;
+            border-left: 2px solid #3b82f6;
+            padding-left: 12px;
+        }
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px;
+            border-radius: 60px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 0;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #9ca3cf;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+        }
+        .time-select {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+        .time-option {
+            flex: 1;
+            background: #0f1424;
+            border: 1px solid #2a345c;
+            border-radius: 48px;
+            padding: 10px;
+            text-align: center;
+            color: #9ca3cf;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .time-option.selected {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .action-btn {
+            width: 100%;
+            background: linear-gradient(95deg, #3b82f6, #8b5cf6);
+            border: none;
+            padding: 14px;
+            border-radius: 48px;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            margin: 8px 0 16px 0;
+            transition: transform 0.1s;
+        }
+        .action-btn.secondary {
+            background: linear-gradient(95deg, #10b981, #059669);
+        }
+        .action-btn.danger {
+            background: linear-gradient(95deg, #ef4444, #dc2626);
+        }
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+        .km-list {
+            background: #030617;
+            border-radius: 24px;
+            padding: 12px;
+            max-height: 360px;
+            overflow-y: auto;
+            margin: 16px 0;
+        }
+        .km-item {
+            background: #0f1424;
+            border-radius: 20px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border: 1px solid #2a345c;
+        }
+        .km-code {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #a5f3c3;
+            word-break: break-all;
+            margin-bottom: 8px;
+        }
+        .km-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .km-expiry {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #1f2a48;
+            color: #9ca3cf;
+        }
+        .km-expiry.expiring {
+            background: #f97316;
+            color: white;
+        }
+        .km-expiry.expired {
+            background: #ef4444;
+            color: white;
+        }
+        .copy-btn {
+            background: #1f2a48;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 30px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .input-field {
+            width: 100%;
+            background: #0f1424;
+            border: 1px solid #2a345c;
+            border-radius: 48px;
+            padding: 14px 20px;
+            color: white;
+            font-size: 14px;
+            margin: 12px 0;
+            outline: none;
+        }
+        .message {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 40px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .message.success {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        .message.error {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+        .message.warning {
+            background: rgba(251, 146, 60, 0.15);
+            color: #f97316;
+            border: 1px solid rgba(251, 146, 60, 0.3);
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #1e2742;
+            font-size: 12px;
+            color: #6c7a9e;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .empty-state {
+            text-align: center;
+            color: #6c7a9e;
+            padding: 30px 20px;
+            font-size: 14px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 10px;
+            color: #4a567c;
+        }
+        .expiry-selector {
+            background: #0f1424;
+            border-radius: 24px;
+            padding: 12px;
+            margin: 12px 0;
+        }
+        .expiry-label {
+            color: #9ca3cf;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .export-area {
+            background: #0f1424;
+            border-radius: 24px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid #2a345c;
+        }
+        .btn-small {
+            background: #1f2a48;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>⚡ 卡密管理系统</h1>
+        <div class="sub">⏰ 支持有效期设置 · 自动过期 · 脚本对接</div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" id="tabGenBtn">📦 生成卡密</button>
+            <button class="tab-btn" id="tabVerifyBtn">🔑 验证卡密</button>
+            <button class="tab-btn" id="tabManageBtn">📋 管理卡密</button>
+        </div>
+        
+        <!-- 生成卡密界面 -->
+        <div id="generatePanel">
+            <div class="expiry-selector">
+                <div class="expiry-label">⏰ 卡密有效期</div>
+                <div class="time-select" id="timeSelect">
+                    <div class="time-option" data-hours="1">1小时</div>
+                    <div class="time-option" data-hours="12">12小时</div>
+                    <div class="time-option" data-hours="24">1天</div>
+                    <div class="time-option" data-hours="168">7天</div>
+                    <div class="time-option" data-hours="0">永久</div>
+                </div>
+            </div>
+            <button class="action-btn" id="generateBtn">✨ 生成新卡密</button>
+            
+            <div class="export-area">
+                <div style="color:#9ca3cf; font-size:12px; margin-bottom:12px;">🔧 脚本对接工具</div>
+                <button class="action-btn secondary" id="exportToFileBtn" style="margin:0 0 8px 0; padding:10px;">💾 导出有效卡密到文件</button>
+                <button class="action-btn secondary" id="exportAllBtn" style="margin:0; padding:10px;">📋 复制所有有效卡密</button>
+                <div id="exportMsg" style="font-size:11px; color:#6c7a9e; margin-top:8px; text-align:center;"></div>
+            </div>
+            
+            <div class="km-list" id="cardList">
+                <div class="empty-state">暂无卡密，点击上方按钮生成</div>
+            </div>
+        </div>
+        
+        <!-- 验证卡密界面 -->
+        <div id="verifyPanel" style="display: none;">
+            <input type="text" id="verifyInput" class="input-field" placeholder="输入卡密，例如: ABC1-2345-6789-DEFG" autocomplete="off">
+            <button class="action-btn" id="doVerifyBtn">✅ 验证卡密</button>
+            <div id="verifyMessage" class="message" style="display: none;"></div>
+        </div>
+        
+        <!-- 管理卡密界面 -->
+        <div id="managePanel" style="display: none;">
+            <div class="km-list" id="manageList" style="max-height: 400px;">
+                <div class="empty-state">加载中...</div>
+            </div>
+            <button class="action-btn danger" id="clearExpiredBtn">🗑️ 清理所有过期卡密</button>
+        </div>
+        
+        <div class="stats">
+            <span>📊 未使用: <span id="unusedCount">0</span></span>
+            <span>⏰ 即将过期: <span id="expiringCount">0</span></span>
+            <span>🗑️ 已使用: <span id="usedCount">0</span></span>
+            <span>💾 本地存储</span>
+        </div>
+        <footer>⚡ 点击【导出有效卡密】后，脚本即可识别卡密</footer>
+    </div>
+</div>
+
+<script>
+    // ---------- 数据管理 ----------
+    let cards = [];
+    let selectedHours = 24;
+    
+    function initTimeSelector() {
+        document.querySelectorAll('.time-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.time-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                selectedHours = parseInt(opt.getAttribute('data-hours'));
+            });
+        });
+        document.querySelector('.time-option[data-hours="24"]').classList.add('selected');
+    }
+    
+    function loadData() {
+        const saved = localStorage.getItem('kami_system_v2');
+        if (saved) {
+            try {
+                cards = JSON.parse(saved);
+            } catch(e) { cards = []; }
+        }
+        if (!cards || cards.length === 0) {
+            cards = [];
+            saveData();
+        }
+        updateStats();
+        renderCards();
+        renderManageList();
+        updateExportMsg();
+    }
+    
+    function saveData() {
+        localStorage.setItem('kami_system_v2', JSON.stringify(cards));
+        updateStats();
+        renderCards();
+        renderManageList();
+        updateExportMsg();
+    }
+    
+    function updateExportMsg() {
+        const validCards = getValidCards();
+        const exportMsgDiv = document.getElementById('exportMsg');
+        if (exportMsgDiv) {
+            if (validCards.length > 0) {
+                exportMsgDiv.innerHTML = `📋 当前有 ${validCards.length} 个有效卡密，点击上方按钮导出供脚本使用`;
+                exportMsgDiv.style.color = '#4ade80';
+            } else {
+                exportMsgDiv.innerHTML = `⚠️ 暂无有效卡密，请先生成`;
+                exportMsgDiv.style.color = '#f97316';
+            }
+        }
+    }
+    
+    function isExpired(card) {
+        if (card.used) return false;
+        if (card.expiryHours === 0) return false;
+        const expiryTime = card.createdAt + (card.expiryHours * 60 * 60 * 1000);
+        return Date.now() > expiryTime;
+    }
+    
+    function getRemainingTime(card) {
+        if (card.used) return '已使用';
+        if (card.expiryHours === 0) return '永久有效';
+        const expiryTime = card.createdAt + (card.expiryHours * 60 * 60 * 1000);
+        const remaining = expiryTime - Date.now();
+        if (remaining <= 0) return '已过期';
+        const hours = Math.floor(remaining / (60 * 60 * 1000));
+        const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+        if (hours > 0) return `${hours}小时${minutes}分钟`;
+        return `${minutes}分钟`;
+    }
+    
+    function updateStats() {
+        const unused = cards.filter(c => !c.used && !isExpired(c)).length;
+        const used = cards.filter(c => c.used).length;
+        const expiring = cards.filter(c => !c.used && !isExpired(c) && 
+            (c.expiryHours !== 0 && (c.createdAt + (c.expiryHours * 60 * 60 * 1000) - Date.now()) < 24 * 60 * 60 * 1000)).length;
+        document.getElementById('unusedCount').innerText = unused;
+        document.getElementById('usedCount').innerText = used;
+        document.getElementById('expiringCount').innerText = expiring;
+    }
+    
+    function generateRandomCode() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+        let parts = [];
+        for (let p = 0; p < 4; p++) {
+            let part = '';
+            for (let i = 0; i < 4; i++) {
+                part += chars[Math.floor(Math.random() * chars.length)];
+            }
+            parts.push(part);
+        }
+        return parts.join('-');
+    }
+    
+    function generateCard() {
+        const newCode = generateRandomCode();
+        if (cards.some(c => c.code === newCode)) {
+            return generateCard();
+        }
+        cards.unshift({
+            code: newCode,
+            used: false,
+            createdAt: Date.now(),
+            expiryHours: selectedHours
+        });
+        saveData();
+        showTemporaryMessage('generateMsg', `✅ 卡密生成成功: ${newCode} (有效期: ${selectedHours === 0 ? '永久' : selectedHours + '小时'})`, 'success');
+        updateExportMsg();
+    }
+    
+    function verifyCard(code) {
+        if (!code) return { success: false, reason: 'empty' };
+        const upperCode = code.trim().toUpperCase();
+        const card = cards.find(c => c.code === upperCode);
+        if (!card) return { success: false, reason: 'not_exist' };
+        if (card.used) return { success: false, reason: 'already_used' };
+        if (isExpired(card)) return { success: false, reason: 'expired' };
+        card.used = true;
+        saveData();
+        return { success: true, reason: 'success', expiryHours: card.expiryHours };
+    }
+    
+    function getValidCards() {
+        return cards.filter(c => !c.used && !isExpired(c));
+    }
+    
+    // 导出有效卡密到文件（包含有效期）
+    function exportToFile() {
+        const validCards = getValidCards();
+        if (validCards.length === 0) {
+            showExportMsg('⚠️ 没有有效卡密可导出', 'error');
+            return;
+        }
+        
+        // 导出格式：卡密|过期时间戳（秒）
+        const cardLines = validCards.map(card => {
+            let expiryTimestamp = "0";
+            if (card.expiryHours !== 0) {
+                expiryTimestamp = Math.floor((card.createdAt + (card.expiryHours * 60 * 60 * 1000)) / 1000);
+            }
+            return `${card.code}|${expiryTimestamp}`;
+        }).join('\n');
+        
+        const blob = new Blob([cardLines], {type: 'text/plain'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'valid_cards.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showExportMsg(`✅ 已导出 ${validCards.length} 个有效卡密（含有效期）`, 'success');
+        
+        setTimeout(() => {
+            alert(`已导出 ${validCards.length} 个卡密到 valid_cards.txt\n格式: 卡密|时间戳\n0 表示永久有效`);
+        }, 300);
+    }
+    
+    function copyAllValidCards() {
+        const validCards = getValidCards();
+        if (validCards.length === 0) {
+            showExportMsg('⚠️ 没有有效卡密可复制', 'error');
+            return;
+        }
+        const cardCodes = validCards.map(c => c.code).join('\n');
+        copyToClipboard(cardCodes);
+        showExportMsg(`✅ 已复制 ${validCards.length} 个卡密到剪贴板`, 'success');
+    }
+    
+    function showExportMsg(text, type) {
+        const msgDiv = document.getElementById('exportMsg');
+        if (msgDiv) {
+            msgDiv.innerHTML = text;
+            msgDiv.style.color = type === 'success' ? '#4ade80' : '#f87171';
+            setTimeout(() => {
+                if (msgDiv.innerHTML === text) {
+                    updateExportMsg();
+                }
+            }, 3000);
+        }
+    }
+    
+    function renderCards() {
+        const container = document.getElementById('cardList');
+        const validCards = getValidCards();
+        
+        if (validCards.length === 0) {
+            container.innerHTML = '<div class="empty-state">✨ 暂无可用卡密，点击生成</div>';
+            return;
+        }
+        
+        container.innerHTML = validCards.map(card => {
+            const remaining = getRemainingTime(card);
+            const expiryClass = card.expiryHours !== 0 && (card.createdAt + (card.expiryHours * 60 * 60 * 1000) - Date.now()) < 24 * 60 * 60 * 1000 ? 'expiring' : '';
+            return `
+                <div class="km-item">
+                    <div class="km-code">${card.code}</div>
+                    <div class="km-info">
+                        <span class="km-expiry ${expiryClass}">⏰ ${remaining}</span>
+                        <button class="copy-btn" data-code="${card.code}">📋 复制</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const code = btn.getAttribute('data-code');
+                copyToClipboard(code);
+                showTemporaryMessage('generateMsg', `📋 已复制: ${code}`, 'success');
+            });
+        });
+    }
+    
+    function renderManageList() {
+        const container = document.getElementById('manageList');
+        if (!container) return;
+        
+        if (cards.length === 0) {
+            container.innerHTML = '<div class="empty-state">暂无卡密</div>';
+            return;
+        }
+        
+        container.innerHTML = cards.map(card => {
+            const expired = isExpired(card);
+            const remaining = getRemainingTime(card);
+            let statusClass = '';
+            let statusText = '';
+            if (card.used) {
+                statusClass = 'expired';
+                statusText = '已使用';
+            } else if (expired) {
+                statusClass = 'expired';
+                statusText = '已过期';
+            } else {
+                statusText = remaining;
+            }
+            
+            return `
+                <div class="km-item">
+                    <div class="km-code">${card.code}</div>
+                    <div class="km-info">
+                        <span class="km-expiry ${statusClass}">${statusText}</span>
+                        ${!card.used && !expired ? `<button class="copy-btn" data-manage-code="${card.code}">复制</button>` : ''}
+                        ${!card.used && !expired ? `<button class="copy-btn" data-delete-code="${card.code}" style="background:#ef4444;">删除</button>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        document.querySelectorAll('[data-manage-code]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                copyToClipboard(btn.getAttribute('data-manage-code'));
+                showTemporaryMessage('generateMsg', '已复制', 'success');
+            });
+        });
+        
+        document.querySelectorAll('[data-delete-code]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.getAttribute('data-delete-code');
+                cards = cards.filter(c => c.code !== code);
+                saveData();
+                showTemporaryMessage('generateMsg', `已删除: ${code}`, 'success');
+            });
+        });
+    }
+    
+    function clearExpiredCards() {
+        const beforeCount = cards.length;
+        cards = cards.filter(c => c.used || !isExpired(c));
+        const removed = beforeCount - cards.length;
+        saveData();
+        showTemporaryMessage('generateMsg', `🗑️ 已清理 ${removed} 个过期卡密`, 'success');
+    }
+    
+    function copyToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    }
+    
+    let msgTimeout = null;
+    function showTemporaryMessage(containerId, text, type) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const oldMsg = container.querySelector('.temp-message');
+        if (oldMsg) oldMsg.remove();
+        if (msgTimeout) clearTimeout(msgTimeout);
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${type} temp-message`;
+        msgDiv.innerText = text;
+        container.appendChild(msgDiv);
+        
+        msgTimeout = setTimeout(() => {
+            if (msgDiv && msgDiv.remove) msgDiv.remove();
+        }, 2500);
+    }
+    
+    function showVerifyResult(text, type) {
+        const msgDiv = document.getElementById('verifyMessage');
+        msgDiv.innerText = text;
+        msgDiv.className = `message ${type}`;
+        msgDiv.style.display = 'block';
+        setTimeout(() => {
+            if (msgDiv) msgDiv.style.display = 'none';
+        }, 3000);
+    }
+    
+    function handleVerify() {
+        const input = document.getElementById('verifyInput');
+        const code = input.value.trim();
+        if (!code) {
+            showVerifyResult('⚠️ 请输入卡密', 'error');
+            return;
+        }
+        const result = verifyCard(code);
+        if (result.success) {
+            showVerifyResult(`✅ 验证成功！卡密有效 (有效期: ${result.expiryHours === 0 ? '永久' : result.expiryHours + '小时'})`, 'success');
+            input.value = '';
+            updateStats();
+            updateExportMsg();
+        } else if (result.reason === 'not_exist') {
+            showVerifyResult('❌ 卡密不存在', 'error');
+        } else if (result.reason === 'already_used') {
+            showVerifyResult('❌ 卡密已使用过', 'error');
+        } else if (result.reason === 'expired') {
+            showVerifyResult('⏰ 卡密已过期', 'warning');
+        }
+    }
+    
+    function switchTab(tab) {
+        const genPanel = document.getElementById('generatePanel');
+        const verifyPanel = document.getElementById('verifyPanel');
+        const managePanel = document.getElementById('managePanel');
+        const tabGen = document.getElementById('tabGenBtn');
+        const tabVer = document.getElementById('tabVerifyBtn');
+        const tabMan = document.getElementById('tabManageBtn');
+        
+        genPanel.style.display = 'none';
+        verifyPanel.style.display = 'none';
+        managePanel.style.display = 'none';
+        tabGen.classList.remove('active');
+        tabVer.classList.remove('active');
+        tabMan.classList.remove('active');
+        
+        if (tab === 'generate') {
+            genPanel.style.display = 'block';
+            tabGen.classList.add('active');
+            renderCards();
+        } else if (tab === 'verify') {
+            verifyPanel.style.display = 'block';
+            tabVer.classList.add('active');
+        } else {
+            managePanel.style.display = 'block';
+            tabMan.classList.add('active');
+            renderManageList();
+        }
+    }
+    
+    // 事件绑定
+    document.getElementById('generateBtn').addEventListener('click', generateCard);
+    document.getElementById('doVerifyBtn').addEventListener('click', handleVerify);
+    document.getElementById('clearExpiredBtn').addEventListener('click', clearExpiredCards);
+    document.getElementById('exportToFileBtn').addEventListener('click', exportToFile);
+    document.getElementById('exportAllBtn').addEventListener('click', copyAllValidCards);
+    document.getElementById('tabGenBtn').addEventListener('click', () => switchTab('generate'));
+    document.getElementById('tabVerifyBtn').addEventListener('click', () => switchTab('verify'));
+    document.getElementById('tabManageBtn').addEventListener('click', () => switchTab('manage'));
+    document.getElementById('verifyInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleVerify();
+    });
+    
+    // 启动
+    initTimeSelector();
+    loadData();
+    
+    const genPanelDiv = document.getElementById('generatePanel');
+    if (!document.getElementById('generateMsg')) {
+        const msgContainer = document.createElement('div');
+        msgContainer.id = 'generateMsg';
+        msgContainer.style.marginTop = '12px';
+        genPanelDiv.appendChild(msgContainer);
+    }
+</script>
+</body>
+</html>
